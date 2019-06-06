@@ -6,6 +6,7 @@ import Animate from 'rc-animate';
 import LazyRenderBox from './LazyRenderBox';
 import getScrollBarSize from 'rc-util/lib/getScrollBarSize';
 import IDialogPropTypes from './IDialogPropTypes';
+import Draggable from 'react-draggable';
 
 let uuid = 0;
 let openCount = 0;
@@ -56,6 +57,7 @@ export default class Dialog extends React.Component<IDialogPropTypes, any> {
     maskClosable: true,
     destroyOnClose: false,
     prefixCls: 'rc-dialog',
+    draggable: false,
   };
 
   private inTransition: boolean;
@@ -230,7 +232,7 @@ export default class Dialog extends React.Component<IDialogPropTypes, any> {
     const style = { ...props.style, ...dest };
     const sentinelStyle = { width: 0, height: 0, overflow: 'hidden' };
     const transitionName = this.getTransitionName();
-    const dialogElement = (
+    const dialog = (
       <LazyRenderBox
         key="dialog-element"
         role="document"
@@ -241,22 +243,28 @@ export default class Dialog extends React.Component<IDialogPropTypes, any> {
         onMouseDown={this.onDialogMouseDown}
       >
         <div tabIndex={0} ref={this.saveRef('sentinelStart')} style={sentinelStyle} aria-hidden="true" />
-        <div className={`${prefixCls}-content`}>
-          {closer}
-          {header}
-          <div
-            className={`${prefixCls}-body`}
-            style={props.bodyStyle}
-            ref={this.saveRef('body')}
-            {...props.bodyProps}
-          >
-            {props.children}
+          <div className={`${prefixCls}-content`}>
+            {closer}
+            {header}
+            <div
+              className={`${prefixCls}-body`}
+              style={props.bodyStyle}
+              ref={this.saveRef('body')}
+              {...props.bodyProps}
+            >
+              {props.children}
+            </div>
+            {footer}
           </div>
-          {footer}
-        </div>
+        
         <div tabIndex={0} ref={this.saveRef('sentinelEnd')} style={sentinelStyle} aria-hidden="true" />
       </LazyRenderBox>
     );
+    const dialogElement = props.draggable ? (
+      <Draggable handle={`.${prefixCls}`} {...props.draggableProps}>
+        {dialog}
+      </Draggable>
+    ) : dialog;
     return (
       <Animate
         key="dialog"
